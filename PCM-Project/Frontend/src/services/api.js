@@ -1,9 +1,13 @@
 import axios from 'axios'
 
 let API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'
-// Tự động thêm /api nếu thiếu (fix lỗi quên điền trong Env Var)
-if (API_BASE_URL && !API_BASE_URL.endsWith('/api')) {
-  API_BASE_URL += '/api';
+
+// Xử lý URL: xóa khoảng trắng và dấu gạch chéo cuối để tránh lỗi //api
+API_BASE_URL = API_BASE_URL.trim().replace(/\/+$/, '')
+
+// Tự động thêm /api nếu thiếu
+if (!API_BASE_URL.endsWith('/api')) {
+  API_BASE_URL += '/api'
 }
 
 const apiClient = axios.create({
