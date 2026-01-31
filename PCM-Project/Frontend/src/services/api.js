@@ -10,6 +10,8 @@ if (!API_BASE_URL.endsWith('/api')) {
   API_BASE_URL += '/api'
 }
 
+console.log('Current API Base URL:', API_BASE_URL)
+
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {

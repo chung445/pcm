@@ -184,11 +184,6 @@ app.UseExceptionHandler(errorApp =>
 
 app.UseCors("AllowVueApp");
 
-// Tắt chuyển hướng HTTPS trên Render để tránh lỗi CORS với Preflight request
-// if (!app.Environment.IsDevelopment())
-// {
-//    app.UseHttpsRedirection();
-// }
 
 app.UseAuthentication();
 app.UseAuthorization();
