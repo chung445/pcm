@@ -182,6 +182,9 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
+// Ensure routing is enabled so CORS middleware can handle preflight requests
+app.UseRouting();
+
 app.UseCors("AllowVueApp");
 
 
