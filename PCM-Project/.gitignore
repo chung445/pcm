@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+**/dist/
+bin/
+**/bin/
+obj/
+**/obj/
+
+# IDEs & Editors
+.idea/
+.vscode/
+.vs/
+*.suo
+*.user
+
+# Logs & Env
+*.log
+.env
+.env.local
