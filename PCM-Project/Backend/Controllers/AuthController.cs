@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PCM.API.DTOs;
 using PCM.API.Services;
 using System.Security.Claims;
+using Microsoft.Extensions.Logging;
 
 namespace PCM.API.Controllers;
 
@@ -11,20 +12,30 @@ namespace PCM.API.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, ILogger<AuthController> logger)
     {
         _authService = authService;
+        _logger = logger;
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
-        var result = await _authService.LoginAsync(loginDto);
-        if (result == null)
-            return Unauthorized(new { message = "Invalid email or password" });
+        try
+        {
+            var result = await _authService.LoginAsync(loginDto);
+            if (result == null)
+                return Unauthorized(new { message = "Invalid email or password" });
 
-        return Ok(result);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Login failed for {Email}", loginDto?.Email);
+            return Problem(detail: ex.Message, statusCode: 500);
+        }
     }
 
     [HttpPost("register")]
