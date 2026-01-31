@@ -80,6 +80,16 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"] ?? "YourSuperSecretKeyForPCMProject2024MinLength32Characters";
 
+// Validate secret key length early and fail-fast if insufficient (HS256 requires >= 128 bits = 16 bytes)
+{
+    var keyBytes = Encoding.UTF8.GetBytes(secretKey ?? string.Empty);
+    if (keyBytes.Length < 16)
+    {
+        var msg = $"Invalid JwtSettings: SecretKey must be at least 128 bits (16 bytes). Current length: {keyBytes.Length} bytes. Set JwtSettings__SecretKey environment variable with a secure value.";
+        throw new InvalidOperationException(msg);
+    }
+}
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
