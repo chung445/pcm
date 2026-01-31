@@ -9,6 +9,8 @@ using PCM.API.Services;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.DataProtection;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -134,6 +136,12 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Data Protection - persist keys to filesystem for production (configurable via DataProtection__KeysPath)
+var dataProtectionKeysPath = builder.Configuration["DataProtection__KeysPath"] ?? "/srv/data/keys";
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysPath))
+    .SetApplicationName("PCM");
+
 // Cấu hình Forwarded Headers cho Render (Linux/Proxy)
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
@@ -155,6 +163,21 @@ var app = builder.Build();
     else
     {
         logger.LogInformation("No ALLOWED_ORIGINS env var set; using AllowAnyOrigin fallback.");
+    }
+}
+
+// Ensure DataProtection keys directory exists and log status
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    var dpPath = dataProtectionKeysPath;
+    try
+    {
+        if (!Directory.Exists(dpPath)) Directory.CreateDirectory(dpPath);
+        logger.LogInformation("DataProtection keys directory ensured: {Path}", dpPath);
+    }
+    catch (Exception ex)
+    {
+        logger.LogWarning(ex, "Could not create DataProtection keys directory: {Path}", dpPath);
     }
 }
 
