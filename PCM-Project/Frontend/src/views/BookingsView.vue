@@ -94,9 +94,11 @@
 import { ref, onMounted, computed } from 'vue'
 import { bookingsAPI, courtsAPI } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
+import { useToast } from 'vue-toastification'
 
 const auth = useAuthStore()
 const isAdmin = computed(() => auth.isAdmin)
+const toast = useToast()
 
 const bookings = ref([])
 const courts = ref([])
@@ -128,10 +130,10 @@ const updateBooking = async () => {
     })
     cancelEdit()
     fetchData()
-    alert('Cập nhật thành công')
+    toast.success('Cập nhật thành công')
   } catch (err) {
     console.error(err)
-    alert('Không thể cập nhật')
+    toast.error('Không thể cập nhật')
   }
 }
 
@@ -140,10 +142,10 @@ const deleteBooking = async (id) => {
   try {
     await bookingsAPI.delete(id)
     fetchData()
-    alert('Đã xóa đặt sân')
+    toast.success('Đã xóa đặt sân')
   } catch (err) {
     console.error(err)
-    alert('Không thể xóa')
+    toast.error('Không thể xóa')
   }
 }
 
@@ -163,7 +165,7 @@ const fetchData = async () => {
 }
 
 const checkAvailability = async () => {
-  if (!form.value.startTime || !form.value.endTime) return alert('Chọn ngày giờ')
+  if (!form.value.startTime || !form.value.endTime) return toast.warning('Vui lòng chọn ngày giờ')
   try {
     const res = await bookingsAPI.checkAvailability(form.value.courtId, new Date(form.value.startTime).toISOString(), new Date(form.value.endTime).toISOString())
     available.value = res.data.isAvailable
@@ -176,33 +178,33 @@ const checkAvailability = async () => {
 const createBooking = async () => {
   try {
     const res = await bookingsAPI.create({ courtId: form.value.courtId, startTime: new Date(form.value.startTime).toISOString(), endTime: new Date(form.value.endTime).toISOString() })
-    alert('Đặt thành công. Chờ quản trị duyệt.')
+    toast.success('Đặt thành công. Chờ quản trị duyệt.')
     fetchData()
   } catch (err) {
     console.error(err)
-    alert('Không thể đặt. Có thể cần đăng nhập.')
+    toast.error('Không thể đặt. Có thể cần đăng nhập.')
   }
 }
 
 const approve = async (id) => {
   try {
     await bookingsAPI.approve(id)
-    alert('Đã duyệt')
+    toast.success('Đã duyệt')
     fetchData()
   } catch (err) {
     console.error(err)
-    alert('Không thể duyệt')
+    toast.error('Không thể duyệt')
   }
 }
 
 const reject = async (id) => {
   try {
     await bookingsAPI.reject(id)
-    alert('Đã từ chối')
+    toast.success('Đã từ chối')
     fetchData()
   } catch (err) {
     console.error(err)
-    alert('Không thể từ chối')
+    toast.error('Không thể từ chối')
   }
 }
 

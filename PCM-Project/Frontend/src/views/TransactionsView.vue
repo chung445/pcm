@@ -10,7 +10,7 @@
           <div class="card mb-3">
             <div class="card-body">
               <h5 class="card-title">Tổng thu</h5>
-              <p class="card-text">{{ summary.totalIncome | currency }}</p>
+              <p class="card-text">{{ currency(summary.totalIncome) }}</p>
             </div>
           </div>
         </div>
@@ -18,7 +18,7 @@
           <div class="card mb-3">
             <div class="card-body">
               <h5 class="card-title">Tổng chi</h5>
-              <p class="card-text">{{ summary.totalExpense | currency }}</p>
+              <p class="card-text">{{ currency(summary.totalExpense) }}</p>
             </div>
           </div>
         </div>
@@ -29,7 +29,7 @@
         <li v-for="t in transactions" :key="t.id" class="list-group-item d-flex justify-content-between align-items-center">
           <div>
             <strong>{{ t.description }}</strong>
-            <div class="text-muted small">{{ t.date }} • {{ t.amount | currency }} • {{ t.categoryName }} • <span class="badge bg-secondary">{{ t.status }}</span></div>
+            <div class="text-muted small">{{ t.date }} • {{ currency(t.amount) }} • {{ t.categoryName }} • <span class="badge bg-secondary">{{ t.status }}</span></div>
           </div>
           <div>
             <button v-if="(auth.isAdmin || auth.isTreasurer) && t.status === 'Pending'" class="btn btn-success btn-sm me-1" @click="approve(t.id)">Duyệt</button>
@@ -45,11 +45,13 @@
 import { ref, onMounted } from 'vue'
 import { transactionsAPI } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
+import { useToast } from 'vue-toastification'
 
 const transactions = ref([])
 const summary = ref({ totalIncome: 0, totalExpense: 0 })
 const loading = ref(false)
 const auth = useAuthStore()
+const toast = useToast()
 
 const loadData = async () => {
   loading.value = true
@@ -73,7 +75,7 @@ const approve = async (id) => {
     await loadData()
   } catch (err) {
     console.error(err)
-    alert('Không thể duyệt giao dịch.')
+    toast.error('Không thể duyệt giao dịch.')
   }
 }
 
@@ -83,7 +85,7 @@ const reject = async (id) => {
     await loadData()
   } catch (err) {
     console.error(err)
-    alert('Không thể từ chối giao dịch.')
+    toast.error('Không thể từ chối giao dịch.')
   }
 }
 
@@ -91,16 +93,6 @@ const reject = async (id) => {
 const currency = (val) => {
   if (!val) return '0'
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val)
-}
-
-// expose filter
-</script>
-
-<script>
-export default {
-  filters: {
-    currency: (v) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v)
-  }
 }
 </script>
 
