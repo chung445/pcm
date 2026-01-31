@@ -1,0 +1,38 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "files (1)", "files (1)", "{FB8B6DFF-3AFE-07D1-BEA1-EF15C92A0EF6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PCM-Project", "PCM-Project", "{2FCA6648-EBEA-65CC-0888-ACE477F97D02}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PCM-Project", "PCM-Project", "{39D7ACC4-B26E-40D0-830B-D87AE44E1513}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Backend", "Backend", "{9B6751CD-DF99-8A6E-1C25-DC256B9FCB49}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCM.API", "files (1)\PCM-Project\PCM-Project\Backend\PCM.API.csproj", "{C60DF8B7-0417-E38E-8EED-C6F78E98F177}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C60DF8B7-0417-E38E-8EED-C6F78E98F177}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C60DF8B7-0417-E38E-8EED-C6F78E98F177}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C60DF8B7-0417-E38E-8EED-C6F78E98F177}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C60DF8B7-0417-E38E-8EED-C6F78E98F177}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2FCA6648-EBEA-65CC-0888-ACE477F97D02} = {FB8B6DFF-3AFE-07D1-BEA1-EF15C92A0EF6}
+		{39D7ACC4-B26E-40D0-830B-D87AE44E1513} = {2FCA6648-EBEA-65CC-0888-ACE477F97D02}
+		{9B6751CD-DF99-8A6E-1C25-DC256B9FCB49} = {39D7ACC4-B26E-40D0-830B-D87AE44E1513}
+		{C60DF8B7-0417-E38E-8EED-C6F78E98F177} = {9B6751CD-DF99-8A6E-1C25-DC256B9FCB49}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {96AEA20C-58AA-4D16-A639-B94B83E3ADCF}
+	EndGlobalSection
+EndGlobal
