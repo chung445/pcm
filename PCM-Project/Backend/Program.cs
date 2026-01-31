@@ -162,11 +162,11 @@ TaskScheduler.UnobservedTaskException += (sender, e) =>
 app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+// if (app.Environment.IsDevelopment())
+// {
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+// }
 
 // Global exception handler middleware
 app.UseExceptionHandler(errorApp =>
@@ -197,6 +197,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Thêm endpoint gốc để kiểm tra server sống hay chết
+app.MapGet("/", () => "PCM API is running! Go to /swagger for API documentation.");
 
 var lifetime = app.Lifetime;
 lifetime.ApplicationStarted.Register(() =>
