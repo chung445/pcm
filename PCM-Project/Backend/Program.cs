@@ -107,14 +107,27 @@ builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IChallengeService, ChallengeService>();
 builder.Services.AddScoped<IMatchService, MatchService>();
 
-// CORS Configuration
+// CORS Configuration - allow configuring origins via ALLOWED_ORIGINS env var (semicolon-separated).
+var allowedOrigins = builder.Configuration["ALLOWED_ORIGINS"];
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowVueApp", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        if (!string.IsNullOrWhiteSpace(allowedOrigins))
+        {
+            var origins = allowedOrigins.Split(';', StringSplitOptions.RemoveEmptyEntries);
+            policy.WithOrigins(origins)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
+        }
+        else
+        {
+            // Fallback for development / existing behavior
+            policy.AllowAnyOrigin()
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        }
     });
 });
 
@@ -127,6 +140,20 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 });
 
 var app = builder.Build();
+
+// Log CORS origin configuration at startup
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    var envAllowed = builder.Configuration["ALLOWED_ORIGINS"];
+    if (!string.IsNullOrWhiteSpace(envAllowed))
+    {
+        logger.LogInformation("CORS allowed origins from ALLOWED_ORIGINS env var: {Origins}", envAllowed);
+    }
+    else
+    {
+        logger.LogInformation("No ALLOWED_ORIGINS env var set; using AllowAnyOrigin fallback.");
+    }
+}
 
 // Seed Database
 using (var scope = app.Services.CreateScope())
@@ -184,6 +211,17 @@ app.UseExceptionHandler(errorApp =>
 
 // Ensure routing is enabled so CORS middleware can handle preflight requests
 app.UseRouting();
+
+// Log preflight (OPTIONS) requests to help diagnose CORS issues on Render
+app.Use(async (context, next) =>
+{
+    if (string.Equals(context.Request.Method, "OPTIONS", StringComparison.OrdinalIgnoreCase))
+    {
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation("Preflight OPTIONS {Path} Origin: {Origin} Host: {Host}", context.Request.Path, context.Request.Headers["Origin"].ToString(), context.Request.Host);
+    }
+    await next();
+});
 
 app.UseCors("AllowVueApp");
 
