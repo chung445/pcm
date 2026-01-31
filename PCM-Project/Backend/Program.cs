@@ -107,27 +107,20 @@ builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IChallengeService, ChallengeService>();
 builder.Services.AddScoped<IMatchService, MatchService>();
 
-// CORS Configuration - allow configuring origins via ALLOWED_ORIGINS env var (semicolon-separated).
-var allowedOrigins = builder.Configuration["ALLOWED_ORIGINS"];
+// CORS Configuration - read ALLOWED_ORIGINS as semicolon-separated list and require it in prod
+var allowedOrigins = builder.Configuration["ALLOWED_ORIGINS"]
+    ?.Split(';', StringSplitOptions.RemoveEmptyEntries)
+    ?? Array.Empty<string>();
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowVueApp", policy =>
+    options.AddPolicy("RenderCors", policy =>
     {
-        if (!string.IsNullOrWhiteSpace(allowedOrigins))
-        {
-            var origins = allowedOrigins.Split(';', StringSplitOptions.RemoveEmptyEntries);
-            policy.WithOrigins(origins)
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .AllowCredentials();
-        }
-        else
-        {
-            // Fallback for development / existing behavior
-            policy.AllowAnyOrigin()
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        }
+        // Require explicit origin(s). If empty, no origins will be allowed (safe default).
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -212,18 +205,15 @@ app.UseExceptionHandler(errorApp =>
 // Ensure routing is enabled so CORS middleware can handle preflight requests
 app.UseRouting();
 
-// Log preflight (OPTIONS) requests to help diagnose CORS issues on Render
+// Generic CORS request logging to help diagnose CORS issues on Render
 app.Use(async (context, next) =>
 {
-    if (string.Equals(context.Request.Method, "OPTIONS", StringComparison.OrdinalIgnoreCase))
-    {
-        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-        logger.LogInformation("Preflight OPTIONS {Path} Origin: {Origin} Host: {Host}", context.Request.Path, context.Request.Headers["Origin"].ToString(), context.Request.Host);
-    }
+    Console.WriteLine($"[CORS] {context.Request.Method} {context.Request.Path} Origin: {context.Request.Headers["Origin"]}");
     await next();
 });
 
-app.UseCors("AllowVueApp");
+// Use the RenderCors policy (must be registered earlier)
+app.UseCors("RenderCors");
 
 
 app.UseAuthentication();
