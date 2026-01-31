@@ -8,6 +8,7 @@ using PCM.API.Models;
 using PCM.API.Services;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -117,6 +118,14 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Cấu hình Forwarded Headers cho Render (Linux/Proxy)
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 var app = builder.Build();
 
 // Seed Database
@@ -149,6 +158,9 @@ TaskScheduler.UnobservedTaskException += (sender, e) =>
     e.SetObserved();
 };
 
+// Sử dụng Forwarded Headers để nhận diện đúng protocol (HTTP/HTTPS) từ Render
+app.UseForwardedHeaders();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -175,10 +187,11 @@ app.UseExceptionHandler(errorApp =>
 
 app.UseCors("AllowVueApp");
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
+// Tắt chuyển hướng HTTPS trên Render để tránh lỗi CORS với Preflight request
+// if (!app.Environment.IsDevelopment())
+// {
+//    app.UseHttpsRedirection();
+// }
 
 app.UseAuthentication();
 app.UseAuthorization();
